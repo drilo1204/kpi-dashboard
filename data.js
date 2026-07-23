@@ -396,4 +396,3 @@ const KPI_GRAFIK = {
     gelb: "Standardprozess für Wiederholer weiter verkürzen",
   },
 };
-// Netlify-Git-Verbindung getestet: 23.07.2026 14:49
