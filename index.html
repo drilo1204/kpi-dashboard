@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI Dashboard – Partner &amp; Friends</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <h1 class="header-title" id="dashboard-title">KPI Dashboard</h1>
+    <div class="header-meta">
+      <div class="header-meta-item">
+        <div class="header-meta-label">Kalenderwoche</div>
+        <div class="header-meta-value" id="meta-kw">–</div>
+      </div>
+      <div class="header-meta-item">
+        <div class="header-meta-label">Monat</div>
+        <div class="header-meta-value" id="meta-monat">–</div>
+      </div>
+      <div class="header-meta-item">
+        <div class="header-meta-label">Letztes Update</div>
+        <div class="header-meta-value" id="meta-update">–</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-grid" id="dashboard-grid">
+  </main>
+
+  <footer class="footer">
+    Partner &amp; Friends &ndash; Internes KPI Dashboard
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // Auto-Refresh: Seite lädt sich täglich um 07:00 Uhr neu
+    // + alle 4 Stunden als Backup
+    (function autoRefresh() {
+      const now = new Date();
+      const next7 = new Date();
+      next7.setHours(7, 0, 0, 0);
+      if (now >= next7) next7.setDate(next7.getDate() + 1);
+      const msUntil7 = next7 - now;
+
+      // Neu laden um 07:00
+      setTimeout(() => { location.reload(true); }, msUntil7);
+
+      // Backup: alle 4 Stunden neu laden
+      setInterval(() => { location.reload(true); }, 4 * 60 * 60 * 1000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.DS_Store
+.netlify/
+01_Netlify_Upload/
+deploy/
+03_Extern/
+.claude/
+*.zip
+*.webloc
