@@ -45,16 +45,16 @@ const KPI_GOOGLE = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 65, gelb: 50 },
-  aktuell: 55.8,  // 43 von 77 Auslieferungen (Stadt Göttingen ausgeklammert)
+  aktuell: 58.1,  // 43 von 74 Auslieferungen (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 65,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 78.6 },
-    { periode: "Mrz 26", wert: 75 },
+    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
     { periode: "Apr 26", wert: 47.1 },
     { periode: "Mai 26", wert: 42.9 },
     { periode: "Jun 26", wert: 30.8 },
-    { periode: "Jul 26", wert: 33.3 },
+    // Jul 26 läuft noch – erst nach Monatsabschluss aufnehmen
   ],
   storyText: "Bewertungen weiter aktiv einholen — Ziel 65 % rückt näher",
   handlung: {
@@ -77,16 +77,16 @@ const KPI_REFERENZ = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 90, gelb: 65 },
-  aktuell: 85.7,  // 66 von 77 Auslieferungen (Stadt Göttingen ausgeklammert)
+  aktuell: 86.5,  // 64 von 74 Auslieferungen (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 90,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 92.9 },
-    { periode: "Mrz 26", wert: 80 },
+    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
     { periode: "Apr 26", wert: 94.1 },
     { periode: "Mai 26", wert: 100 },
     { periode: "Jun 26", wert: 84.6 },
-    { periode: "Jul 26", wert: 66.7 },
+    // Jul 26 läuft noch – erst nach Monatsabschluss aufnehmen
   ],
   storyText: "Konstant hohe Referenzquote — 90 %-Ziel in Reichweite",
   handlung: null,  // im Ziel — keine Handlung nötig
@@ -200,7 +200,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   prioritaet: "prio",
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 10, gelb: 7 },
-  aktuell: 6.2,  // Ø Verträge pro Woche (174 Verträge / 28 KWs)
+  aktuell: 6.8,  // Ø Verträge pro Woche (178 Verträge / 26 KWs, ohne laufende KW 30)
   ziel: 10,
   showLetzteWochen: 3,
   // Verkäufer-Übersicht: absolute Verträge Total + pro Quartal.
@@ -209,23 +209,23 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   mitarbeiterOhneAmpel: true,
   mitarbeiter: {
     fatima: {
-      aktuell: 69,   // Total Verträge 2026 (Excel-Ist GES)
+      aktuell: 72,   // Total Verträge 2026 (Rohdaten, ohne laufende KW 30)
       quartale: [
-        { periode: "Jan-Mrz", wert: 34 },  // real eingeholt (Excel-Ist KW 1-13: 30, +4 Nachträge aus KW 27-29)
-        { periode: "Apr-Jun", wert: 31 },  // real eingeholt (Excel-Ist KW 14-26: 24, +7 Nachträge aus KW 27-29)
+        { periode: "Jan-Mrz", wert: 34 },  // real eingeholt
+        { periode: "Apr-Jun", wert: 31 },  // real eingeholt
       ],
     },
     gabriella: {
-      aktuell: 42,   // Total Excel-Ist
+      aktuell: 42,   // Total Rohdaten (ohne KW 30)
       quartale: [
         { periode: "Jan-Mrz", wert: 14 },
         { periode: "Apr-Jun", wert: 23 },
       ],
     },
     david: {
-      aktuell: 18,   // Total real (Juni 18 eingeholt; Excel-Ist zeigt 15, +3 noch in Erfassung)
+      aktuell: 16,   // Total Rohdaten
       quartale: [
-        { periode: "Apr-Jun", wert: 18 },  // Juni real 18 (mit Erfassungsverzug)
+        { periode: "Apr-Jun", wert: 7 },   // KW 24 (Nachtrag 08.06.) + KW 26
       ],
     },
   },
@@ -252,12 +252,13 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
     { periode: "KW 21", wert: 1 },
     { periode: "KW 22", wert: 5 },
     { periode: "KW 23", wert: 5 },
-    { periode: "KW 24", wert: 0 },
+    { periode: "KW 24", wert: 1 },
     { periode: "KW 25", wert: 0 },
     { periode: "KW 26", wert: 19 },
     { periode: "KW 27", wert: 19 },
-    { periode: "KW 28", wert: 4 },
-    { periode: "KW 29", wert: 8 },
+    { periode: "KW 28", wert: 5 },
+    { periode: "KW 29", wert: 10 },
+    // KW 30 läuft noch – erst nach Wochenabschluss aufnehmen
   ],
 };
 
@@ -378,18 +379,21 @@ const KPI_GRAFIK = {
   verantwortlich: "Institutionsbetreuung",
   invertiert: true,
   schwpiegel: { gruen: 60, gelb: 80 },
-  aktuell: 70.2,  // Ø 2026 (55 Projekte)
+  aktuell: 78.6,  // Ø 2026 (84 Projekte) — nach Format-Korrektur (Mai/Jun jetzt sichtbar)
   ziel: 60,
   showLetzteWochen: 3,
   trend: [
-    { periode: "Jan 26", wert: 97 },
-    { periode: "Feb 26", wert: 84 },
-    { periode: "Mrz 26", wert: 71.1 },
-    { periode: "Apr 26", wert: 53.4 },
+    { periode: "Jan 26", wert: 215.5 },  // 2 Projekte (Ausreißer: sehr alte Aufträge)
+    { periode: "Feb 26", wert: 94.1 },   // 18 Projekte
+    { periode: "Mrz 26", wert: 74.7 },   // 23 Projekte
+    { periode: "Apr 26", wert: 67.2 },   // 18 Projekte
+    { periode: "Mai 26", wert: 68.5 },   // 11 Projekte
+    { periode: "Jun 26", wert: 66.3 },   // 12 Projekte
   ],
-  storyText: "Deutlicher Fortschritt: 97 → 53 Tage. April im Ziel — Rhythmus halten",
+  storyText: "Q2 stabil um 66–68 Tage — deutlicher Fortschritt seit Februar (94 → 66)",
   handlung: {
     rot: "Bottleneck im Grafik-Prozess identifizieren, Vorlaufzeit prüfen",
     gelb: "Standardprozess für Wiederholer weiter verkürzen",
   },
 };
+// Netlify-Git-Verbindung getestet: 23.07.2026 14:49
