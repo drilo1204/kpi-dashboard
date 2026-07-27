@@ -63,9 +63,6 @@ function deltaZeile(trend, kpi) {
 
 // ---- Fortschrittsbalken zum Ziel ----
 function progressBar(aktuell, ziel, ampel, invertiert = false) {
-  // Bei invertiert (z.B. Grafik-Tage: niedrig = gut):
-  //   Fortschritt = wieviel besser als aktuell wir noch werden müssen
-  //   Wenn aktuell <= ziel: 100%, sonst ziel/aktuell
   let prozent;
   if (invertiert) {
     prozent = aktuell <= ziel ? 100 : Math.max(0, (ziel / aktuell) * 100);
@@ -104,38 +101,49 @@ function handlungHTML(kpi, ampel) {
   return `<div class="handlung ampel-${ampel}"><span class="handlung-icon">${icon}</span>${text}</div>`;
 }
 
-// ---- Story-Text (ersetzt Bleiwüsten-infoText) ----
+// ---- Story-Text ----
 function storyHTML(kpi) {
   if (!kpi.storyText) return "";
   return `<div class="story-text">${kpi.storyText}</div>`;
 }
 
-// ---- Sparkline SVG ----
-function sparklineSVG(daten, farbe, breite, hoehe) {
+// ---- Sparkline SVG mit Hover-Tooltips (natives SVG <title>) ----
+function sparklineSVG(daten, farbe, breite, hoehe, einheit) {
   if (!daten || daten.length < 2) return "";
   const werte = daten.map(d => d.wert);
   const min = Math.min(...werte);
   const max = Math.max(...werte);
   const range = max - min || 1;
-  const pad = 2;
+  const pad = 4;
 
   const punkte = werte.map((w, i) => {
     const x = pad + (i / (werte.length - 1)) * (breite - 2 * pad);
     const y = hoehe - pad - ((w - min) / range) * (hoehe - 2 * pad);
-    return `${x},${y}`;
+    return { x, y, wert: w, periode: daten[i].periode };
   });
 
   const strokeColor = farbe === "gruen" ? "var(--green)"
     : farbe === "gelb" ? "var(--yellow)"
     : farbe === "rot" ? "var(--red)" : "var(--sparkline)";
 
+  const suf = einheit || "";
+  const polyline = punkte.map(p => `${p.x},${p.y}`).join(" ");
+  const last = punkte[punkte.length - 1];
+
+  const hoverPunkte = punkte.map(p =>
+    `<circle cx="${p.x}" cy="${p.y}" r="6" fill="rgba(255,255,255,0.001)" class="spark-hit">
+       <title>${p.periode}: ${p.wert}${suf}</title>
+     </circle>`
+  ).join("");
+
   return `<svg viewBox="0 0 ${breite} ${hoehe}" preserveAspectRatio="none">
-    <polyline points="${punkte.join(" ")}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${punkte[punkte.length-1].split(",")[0]}" cy="${punkte[punkte.length-1].split(",")[1]}" r="3.5" fill="${strokeColor}"/>
+    <polyline points="${polyline}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${last.x}" cy="${last.y}" r="3.5" fill="${strokeColor}"/>
+    ${hoverPunkte}
   </svg>`;
 }
 
-// ---- Vormonats-Chips (mit korrektem "pp"-Suffix bei Prozent) ----
+// ---- Vormonats-Chips ----
 function letzteWochenHTML(kpi, trend) {
   if (!kpi.showLetzteWochen || trend.length < kpi.showLetzteWochen) return "";
   const letzte = trend.slice(-kpi.showLetzteWochen);
@@ -158,10 +166,7 @@ function letzteWochenHTML(kpi, trend) {
     }).join("") + `</div>`;
 }
 
-// ---- Mitarbeiter-Zeilen (wiederverwendbar für Ma-Card und Standard-Card) ----
-// Optionen im kpi-Objekt:
-//   - mitarbeiter: { key: {aktuell, info?, quartale?, trend?}, ... }
-//   - mitarbeiterOhneAmpel: true  → Chips + Wert-Farben neutral (Info-Modus)
+// ---- Mitarbeiter-Zeilen ----
 function renderMitarbeiterHTML(kpi) {
   if (!kpi.mitarbeiter) return "";
   const suf = einheitSuffix(kpi.einheit);
@@ -173,7 +178,6 @@ function renderMitarbeiterHTML(kpi) {
     const maAmpel = ohneAmpel ? "gruen" : getAmpel(ma.aktuell, kpi.schwpiegel);
     const infoSpan = ma.info ? `<span class="ma-info">${ma.info}</span>` : "";
 
-    // Quartals-Chips
     let quartalHTML = "";
     if (ma.quartale && ma.quartale.length > 0) {
       const q = ma.quartale;
@@ -203,7 +207,7 @@ function renderMitarbeiterHTML(kpi) {
     }
 
     const sparkline = !quartalHTML && ma.trend && ma.trend.length >= 2
-      ? `<div class="ma-sparkline">${sparklineSVG(ma.trend, maAmpel, 80, 24)}</div>` : "";
+      ? `<div class="ma-sparkline">${sparklineSVG(ma.trend, maAmpel, 80, 24, suf)}</div>` : "";
 
     const valueCls = ohneAmpel ? "neutral" : `ampel-${maAmpel}`;
     html += `
@@ -252,7 +256,7 @@ function renderStandardCard(kpi) {
       ${detailsHTML}
       ${wochenChips}
       ${trend.length >= 2 ? `
-        <div class="sparkline-container">${sparklineSVG(trend, ampel, sparkBreite, sparkHoehe)}</div>
+        <div class="sparkline-container">${sparklineSVG(trend, ampel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit))}</div>
         <div class="sparkline-labels">
           <span>${trend[0].periode}</span>
           <span>${trend[trend.length-1].periode}</span>
@@ -287,7 +291,7 @@ function renderMaCard(kpi) {
       <div class="kpi-ziel">Ziel: <strong>${formatWert(kpi.ziel, kpi.einheit)}${einheitSuffix(kpi.einheit)}</strong> · Team-Schnitt</div>
       ${wochenChips}
       ${teamTrend.length >= 2 ? `
-        <div class="sparkline-container">${sparklineSVG(teamTrend, teamAmpel, sparkBreite, sparkHoehe)}</div>
+        <div class="sparkline-container">${sparklineSVG(teamTrend, teamAmpel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit))}</div>
         <div class="sparkline-labels">
           <span>${teamTrend[0].periode}</span>
           <span>${teamTrend[teamTrend.length-1].periode}</span>
@@ -308,14 +312,12 @@ function renderDashboard() {
   const grid = document.getElementById("dashboard-grid");
   grid.innerHTML = "";
 
-  // Reihenfolge nach Wichtigkeit (Vertrieb zuerst — Umsatz-KPIs):
-  // Prio-Karten (oben, größer): Conversion Rate + Vertragseingänge pro Woche
+  // 3+3 gleich große Karten: Vertrieb + NPS oben, Kunde + Fulfillment unten
   grid.innerHTML += renderMaCard(KPI_CONVERSION);
   grid.innerHTML += renderStandardCard(KPI_VERTRAGSEINGAENGE_WOCHE);
-  // Sekundär-Karten (unten, kleiner)
+  grid.innerHTML += renderStandardCard(KPI_NPS);
   grid.innerHTML += renderStandardCard(KPI_GOOGLE);
   grid.innerHTML += renderStandardCard(KPI_REFERENZ);
-  grid.innerHTML += renderStandardCard(KPI_NPS);
   grid.innerHTML += renderStandardCard(KPI_GRAFIK);
 }
 
