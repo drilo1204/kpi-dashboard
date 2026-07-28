@@ -47,6 +47,7 @@ const KPI_GOOGLE = {
   schwpiegel: { gruen: 65, gelb: 50 },
   aktuell: 58.1,  // 43 von 74 Auslieferungen (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 65,
+  showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 78.6 },
@@ -79,6 +80,7 @@ const KPI_REFERENZ = {
   schwpiegel: { gruen: 90, gelb: 65 },
   aktuell: 86.5,  // 64 von 74 Auslieferungen (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 90,
+  showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 92.9 },
@@ -108,11 +110,15 @@ const KPI_NPS = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 60, gelb: 30 },
-  aktuell: 70.6,  // 13 Promotoren – 1 Detraktor von 17 Befragungen
+  // NPS wird quartalsweise erhoben (Q1 = Jan-Mrz, Q2 = Apr-Jun usw.).
+  // Q2 26: Erhebung läuft noch – vorläufiger Wert aus Apr+Mai (17 Rückläufe).
+  aktuell: 70.6,  // Q2 26 vorläufig – Juni-Rückläufe noch einzuholen
   ziel: 60,
+  showLetzteWochen: 3,
   trend: [
-    { periode: "Apr 26", wert: 85.7 },
-    { periode: "Mai 26", wert: 60 },
+    { periode: "Q2 25", wert: 71.4 },   // 5 Prom / 2 Pass / 0 Detr (7 Rückläufe)
+    { periode: "Q3 25", wert: 75.0 },   // 3 Prom / 1 Pass / 0 Detr (4 Rückläufe)
+    { periode: "Q2 26", wert: 70.6 },   // vorläufig – Juni-Erhebung ausstehend
   ],
   details: {
     rueckmeldungen: 17,
@@ -120,7 +126,7 @@ const KPI_NPS = {
     passive: 3,
     kritiker: 1,
   },
-  storyText: "Sehr gute Weiterempfehlungsrate — Ziel klar erreicht",
+  storyText: "Q2 26 vorläufig — Juni-Rückläufe noch einzuholen",
   handlung: {
     rot: "Kritisches Feedback direkt zurückspiegeln, Ursache dokumentieren",
     gelb: "Neutrale Rückmeldungen aktiv nachbereiten",
