@@ -105,29 +105,31 @@ def format_excel_section(excel_data: list) -> str:
 def build_prompt(rules: str, current_data_js: str, excel_data: list) -> str:
     heute = datetime.now(timezone.utc).strftime("%d.%m.%Y")
     excel_section = format_excel_section(excel_data)
-    return f"""Du aktualisierst die data.js des KPI-Dashboards von Brunner Mobil. Halte dich strikt an die RULES.md.
-
-WICHTIG - Ausgabeformat:
-- Gib NUR den vollstaendigen neuen data.js-Inhalt zurueck.
-- Kein Markdown-Fence, kein Vor- oder Nachtext, keine Erklaerung.
-- Behalte die vorhandene Struktur bei (alle KPI-Konstanten, Reihenfolge, Kommentare mit Rechenweg).
-- Aktualisiere `letzteAktualisierung` in DASHBOARD_CONFIG auf das heutige Datum: {heute}.
-- Wenn ein Wert unklar oder die Datengrundlage duenn ist: bestehenden Wert behalten und in Kommentar begruenden.
-- Laufende Perioden (aktueller Monat/Woche) NIE als Trend-Datenpunkt aufnehmen (siehe RULES 0.2).
-
-# RULES.md
-{rules}
-
-# Aktuelle data.js
-```
-{current_data_js}
-```
-
-# Excel-Rohdaten aus dem Drive-Ordner
-{excel_section}
-
-Gib jetzt die neue data.js aus - beginnend mit dem Kommentar `// ===...` und endend mit dem letzten schliessenden `};`.
-"""
+    header = (
+        "Du aktualisierst die data.js des KPI-Dashboards von Brunner Mobil. "
+        "Halte dich strikt an die RULES.md.\n\n"
+        "WICHTIG - Ausgabeformat:\n"
+        "- Gib NUR den vollstaendigen neuen data.js-Inhalt zurueck.\n"
+        "- Kein Markdown-Fence, kein Vor- oder Nachtext, keine Erklaerung.\n"
+        "- Behalte die vorhandene Struktur bei (alle KPI-Konstanten, Reihenfolge, Kommentare mit Rechenweg).\n"
+        f"- Aktualisiere `letzteAktualisierung` in DASHBOARD_CONFIG auf das heutige Datum: {heute}.\n"
+        "- Wenn ein Wert unklar oder die Datengrundlage duenn ist: bestehenden Wert behalten und in Kommentar begruenden.\n"
+        "- Laufende Perioden (aktueller Monat/Woche) NIE als Trend-Datenpunkt aufnehmen (siehe RULES 0.2).\n"
+    )
+    footer = (
+        "\nGib jetzt die neue data.js aus - beginnend mit dem Kommentar '// ===...' "
+        "und endend mit dem letzten schliessenden '};'.\n"
+    )
+    return (
+        header
+        + "\n# RULES.md\n"
+        + rules
+        + "\n\n# Aktuelle data.js\n```\n"
+        + current_data_js
+        + "\n```\n\n# Excel-Rohdaten aus dem Drive-Ordner\n"
+        + excel_section
+        + footer
+    )
 
 
 def call_anthropic(prompt: str) -> str:
