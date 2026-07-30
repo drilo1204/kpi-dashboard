@@ -20,8 +20,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_JS = REPO_ROOT / "data.js"
 RULES_MD = REPO_ROOT / "RULES.md"
 DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID", "1x1RW-0GIZw8hZs4ZyxftKRcbFCbHhkzf")
-ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-opus-5")
-MAX_ROWS_PER_SHEET = 500
+# claude-sonnet-4-5 = stabil, ausreichend fuer diese Aufgabe.
+# Kann per Repo-Variable ANTHROPIC_MODEL ueberschrieben werden.
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+MAX_ROWS_PER_SHEET = 300
 MAX_TOKENS_OUT = 16000
 
 
@@ -132,17 +134,31 @@ def build_prompt(rules: str, current_data_js: str, excel_data: list) -> str:
     )
 
 
-def call_anthropic(prompt: str) -> str:
+def call_anthropic(prompt: str) -> tuple[str, str, dict]:
+    """Ruft Anthropic auf und liefert (text, stop_reason, usage_dict).
+    Bei API-Fehler wird die Exception nach oben durchgereicht."""
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     response = client.messages.create(
         model=ANTHROPIC_MODEL,
         max_tokens=MAX_TOKENS_OUT,
         messages=[{"role": "user", "content": prompt}],
     )
+    stop_reason = getattr(response, "stop_reason", "unknown")
+    usage = {}
+    if hasattr(response, "usage") and response.usage is not None:
+        usage = {
+            "input_tokens": getattr(response.usage, "input_tokens", None),
+            "output_tokens": getattr(response.usage, "output_tokens", None),
+        }
+
+    block_types = [getattr(b, "type", "unknown") for b in response.content]
+    log(f"      Response-Block-Typen: {block_types}")
+
     text = "".join(
-        block.text for block in response.content if getattr(block, "type", None) == "text"
+        getattr(block, "text", "") for block in response.content
+        if getattr(block, "type", None) == "text"
     )
-    return text.strip()
+    return text.strip(), stop_reason, usage
 
 
 def strip_code_fence(text: str) -> str:
@@ -210,15 +226,25 @@ def main() -> int:
     log(f"[5/7] Anthropic aufrufen (Modell {ANTHROPIC_MODEL}) ...")
     prompt = build_prompt(rules, current_data_js, excel_data)
     log(f"      Prompt-Groesse: {len(prompt)} Zeichen (grob {len(prompt)//4} Tokens).")
-    new_data_js = strip_code_fence(call_anthropic(prompt))
-    log(f"      Antwort erhalten: {len(new_data_js)} Zeichen.")
+    try:
+        raw_text, stop_reason, usage = call_anthropic(prompt)
+    except Exception as e:
+        log(f"      FEHLER beim Anthropic-Call: {type(e).__name__}: {e}")
+        set_output("changed", "false")
+        set_output("reason", f"anthropic-call-fehler: {type(e).__name__}")
+        return 4
+    log(f"      stop_reason: {stop_reason}")
+    log(f"      usage: {usage}")
+    log(f"      Rohantwort: {len(raw_text)} Zeichen.")
+    new_data_js = strip_code_fence(raw_text)
+    log(f"      Nach Code-Fence-Strip: {len(new_data_js)} Zeichen.")
 
     log("[6/7] Ausgabe validieren ...")
     ok, msg = validate_data_js(new_data_js)
     if not ok:
         log(f"      FEHLER: {msg}")
-        log("      Antwort (erste 800 Zeichen):")
-        log(new_data_js[:800])
+        log("      Antwort (erste 1200 Zeichen):")
+        log(raw_text[:1200] if raw_text else "(leer)")
         set_output("changed", "false")
         set_output("reason", f"validierung-fehlgeschlagen: {msg}")
         return 3
