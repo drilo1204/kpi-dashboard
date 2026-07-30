@@ -1,0 +1,62 @@
+name: KPI Dashboard Auto-Update
+
+on:
+  schedule:
+    # Jeden Mittwoch 06:00 CEST / 05:00 CET (= 04:00 UTC)
+    - cron: '0 4 * * 3'
+  workflow_dispatch:  # Erlaubt manuelles Ausloesen ueber die GitHub-UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Abhaengigkeiten installieren
+        run: pip install -r scripts/requirements.txt
+
+      - name: Auto-Update ausfuehren
+        id: update
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/auto_update.py
+
+      - name: Aenderungen committen und pushen
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name "kpi-auto-update"
+          git config user.email "auto@brunner-mobil.de"
+          git add data.js
+          git commit -m "auto-update: data.js aus Drive-Sync $(date +%Y-%m-%d)"
+          git push
+
+      - name: E-Mail-Benachrichtigung
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          from: KPI Auto-Update <${{ secrets.GMAIL_USER }}>
+          to: drilan.veseli@brunner-mobil.de
+          subject: "KPI Dashboard Auto-Update: ${{ job.status }} (${{ steps.update.outputs.reason || 'kein-status' }})"
+          body: |
+            Auto-Update ist gelaufen.
+
+            Job-Status: ${{ job.status }}
+            data.js geaendert: ${{ steps.update.outputs.changed }}
+            Grund: ${{ steps.update.outputs.reason }}
+
+            Details und Log:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
