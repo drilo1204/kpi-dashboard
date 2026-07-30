@@ -45,17 +45,17 @@ const KPI_GOOGLE = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 65, gelb: 50 },
-  aktuell: 52.9,  // 46 von 87 Auslieferungen (ohne Stadt Göttingen; ohne laufenden August)
+  aktuell: 58.1,  // 43 von 74 Auslieferungen Jan-Jun (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 65,
   showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 78.6 },
-    { periode: "Mrz 26", wert: 76.2 },
+    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
     { periode: "Apr 26", wert: 47.1 },
-    { periode: "Mai 26", wert: 57.1 },
+    { periode: "Mai 26", wert: 42.9 },
     { periode: "Jun 26", wert: 30.8 },
-    { periode: "Jul 26", wert: 16.7 },
+    // Jul 26 laeuft noch – erst nach Monatsabschluss aufnehmen (RULES 0.2 + 3.1)
   ],
   storyText: "Bewertungen weiter aktiv einholen — Ziel 65 % rückt näher",
   handlung: {
@@ -78,17 +78,17 @@ const KPI_REFERENZ = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 90, gelb: 65 },
-  aktuell: 86.2,  // 75 von 87 Auslieferungen (ohne Stadt Göttingen; ohne laufenden August)
+  aktuell: 86.5,  // 64 von 74 Auslieferungen Jan-Jun (Stadt Göttingen ausgeklammert; Juli läuft noch)
   ziel: 90,
   showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 92.9 },
-    { periode: "Mrz 26", wert: 81.0 },
+    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
     { periode: "Apr 26", wert: 94.1 },
     { periode: "Mai 26", wert: 100 },
     { periode: "Jun 26", wert: 84.6 },
-    { periode: "Jul 26", wert: 83.3 },
+    // Jul 26 laeuft noch – erst nach Monatsabschluss aufnehmen (RULES 0.2 + 3.2)
   ],
   storyText: "Konstant hohe Referenzquote — 90 %-Ziel in Reichweite",
   handlung: null,
@@ -202,20 +202,20 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   prioritaet: "prio",
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 10, gelb: 7 },
-  aktuell: 6.0,  // 174 Verträge / 29 KWs (ohne KW 30)
+  aktuell: 6.8,  // 178 Verträge / 26 KWs mit ≥1 Vertrag (ohne laufende KW 30)
   ziel: 10,
   showLetzteWochen: 3,
   mitarbeiterOhneAmpel: true,
   mitarbeiter: {
     fatima: {
-      aktuell: 73,
+      aktuell: 72,   // Total Verträge 2026 (Rohdaten, ohne laufende KW 30)
       quartale: [
         { periode: "Jan-Mrz", wert: 34 },
         { periode: "Apr-Jun", wert: 31 },
       ],
     },
     gabriella: {
-      aktuell: 43,
+      aktuell: 42,
       quartale: [
         { periode: "Jan-Mrz", wert: 14 },
         { periode: "Apr-Jun", wert: 23 },
@@ -255,8 +255,8 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
     { periode: "KW 25", wert: 0 },
     { periode: "KW 26", wert: 19 },
     { periode: "KW 27", wert: 19 },
-    { periode: "KW 28", wert: 4 },
-    { periode: "KW 29", wert: 8 },
+    { periode: "KW 28", wert: 5 },
+    { periode: "KW 29", wert: 10 },
   ],
   storyText: "Ziel 10 Verträge/Woche weiter aktiv verfolgen",
   handlung: {
