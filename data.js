@@ -125,7 +125,7 @@ const KPI_NPS = {
     passive: 3,
     kritiker: 1,
   },
-  storyText: "Q2 26 vorläufig — Juni-Rückläufe noch einzuholen",
+  storyText: "Q2 26 vorläufig 70,6 · Vorjahr Q2 25: 71,4 (−0,8 pp) — Juni-Rückläufe noch einzuholen",
   handlung: {
     rot: "Kritisches Feedback direkt zurückspiegeln, Ursache dokumentieren",
     gelb: "Neutrale Rückmeldungen aktiv nachbereiten",
