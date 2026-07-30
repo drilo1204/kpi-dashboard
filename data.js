@@ -96,11 +96,11 @@ const KPI_REFERENZ = {
 
 // ============================================================
 // KPI 3: NPS Institutionsbetreuung
-// Intervall: monatlich
+// Intervall: quartalsweise (Q1 = Jan-Mrz, Q2 = Apr-Jun usw.)
 // Quellen:
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Fahrzeug  Anhänger.xlsx
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Torzähler.xlsx
-// Berechnung: Nur Torzähler-Datei vorhanden, 38 Rückläufe gesamt
+// Q2 26: Erhebung läuft noch – vorläufiger Wert aus Apr+Mai (17 Rückläufe).
 // ============================================================
 const KPI_NPS = {
   label: "NPS Institutionsbetreuung",
@@ -111,24 +111,25 @@ const KPI_NPS = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 60, gelb: 30 },
-  aktuell: 60.5,  // Gesamt: 26 Prom, 9 Pass, 3 Detr = (26-3)/38 × 100
+  aktuell: 70.6,  // Q2 26 vorläufig – Juni-Rückläufe noch einzuholen
   ziel: 60,
   showLetzteWochen: 3,
   trend: [
-    { periode: "Q2 24", wert: 66.7 },
-    { periode: "Q3 24", wert: 33.3 },
-    { periode: "Q4 24", wert: 100 },
-    { periode: "Q1 25", wert: 55.6 },
-    { periode: "Q2 25", wert: 75.0 },
+    { periode: "Q2 25", wert: 71.4 },   // 5 Prom / 2 Pass / 0 Detr (7 Rückläufe)
+    { periode: "Q3 25", wert: 75.0 },   // 3 Prom / 1 Pass / 0 Detr (4 Rückläufe)
+    { periode: "Q2 26", wert: 70.6 },   // vorläufig – Juni-Erhebung ausstehend
   ],
   details: {
-    rueckmeldungen: 38,
-    promotoren: 26,
-    passive: 9,
-    kritiker: 3,
+    rueckmeldungen: 17,
+    promotoren: 13,
+    passive: 3,
+    kritiker: 1,
   },
-  storyText: "Starkes Ergebnis — Ziel 60 erreicht",
-  handlung: null,
+  storyText: "Q2 26 vorläufig — Juni-Rückläufe noch einzuholen",
+  handlung: {
+    rot: "Kritisches Feedback direkt zurückspiegeln, Ursache dokumentieren",
+    gelb: "Neutrale Rückmeldungen aktiv nachbereiten",
+  },
 };
 
 // ============================================================
