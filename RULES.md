@@ -11,12 +11,14 @@
 ### 0.1 Datenzeitraum
 - Es werden **ausschließlich 2026er-Daten** angezeigt. Keine 2025-Rückschau.
 - Historische Vorjahresvergleiche nur, wenn explizit angefragt.
+- **Ausnahme NPS:** wird quartalsweise erhoben, siehe 3.3 — historische Quartale seit Q2 25 dürfen im Trend stehen.
 
 ### 0.2 Nur abgeschlossene Perioden anzeigen
 - **Wöchentliche Trends:** Nur Kalenderwochen, deren Sonntag < heute ist. Laufende Woche wird nicht aufgenommen.
 - **Monatliche Trends:** Nur Monate, deren letzter Tag < heute ist. Laufender Monat wird nicht aufgenommen.
 - **Quartale:** Ein Quartal wird erst nach Ablauf gezeigt (Q2 = Apr-Jun erscheint ab 01.07.).
 - Ausnahme: Wenn ein Quartal-Chip die einzige Datenbasis für einen neuen Verkäufer ist, kann er auch teilweise gezeigt werden (mit „NEU"-Badge).
+- **Aktueller Monat gilt für `aktuell`-Wert ebenfalls als tabu.** Er darf nicht in Total-Aggregate einfließen. Siehe 3.1 und 3.2.
 
 ### 0.3 Ampel-Farben (Standard, kann pro KPI abweichen)
 - Bei normaler Skalierung: `wert >= gruen` → grün, `wert >= gelb` → gelb, sonst rot
@@ -45,6 +47,7 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 - `Grafikabschluss_bis_Auslieferung.xlsx` → KPI 8
 - `Kopie von Wie läufts mit Eurem Fahrzeug  Anhänger.xlsx` → KPI 3 NPS (Fahrzeug-Umfrage)
 - `Kopie von Wie läufts mit Eurem Torzähler.xlsx` → KPI 3 NPS (Torzähler-Umfrage)
+- `NPS_Institutionsbetreuung-3.xlsx` → **NICHT als Quelle nutzen.** Legacy-Datei mit Rohdaten bis Sep 2025. Wird ignoriert.
 
 ### 1.2 Ziel-Datei
 - `data.js` im Repo-Root → einzige Datenquelle für das Dashboard
@@ -68,25 +71,32 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 ### 3.1 KPI 1 Google-Bewertungsquote
 - **Quelle:** `Google-Bewertungen_Referenzen_Auslieferungen.xlsx` → Sheet `Rohdaten`
 - **Ausklammern:** Institutionstyp "Gemeinde / Kommune" (dürfen keine Google-Bewertung abgeben)
-- **Total:** Google-Bew erhalten / Auslieferungen (ohne Kommunen)
-- **Trend:** monatlich (ohne laufenden Monat, siehe 0.2)
+- **AKTUELL:** Google-Bew erhalten / Auslieferungen (ohne Kommunen) — **nur bis inkl. letzten abgeschlossenen Monat.**
+- **Trend:** monatlich, endet beim letzten abgeschlossenen Monat.
+- **Der laufende Monat wird NIE aufgenommen — weder im Trend noch im Total-Aggregate.** Er erscheint erst am 1. des Folgemonats.
+- **Beispiel Stichtag 30.07.2026:** aktuell und Trend enden bei Juni 26. Juli erscheint erst ab 01.08.
 - **Ziel:** 65%, Schwellen gruen 65 gelb 50
 - **Verantwortlich:** "Institutionsbetreuung"
 
 ### 3.2 KPI 2 Referenzquote
 - Analog KPI 1 (dieselbe Excel, ohne Kommunen)
-- **Total:** Referenzen erhalten / Auslieferungen (ohne Kommunen)
+- **AKTUELL:** Referenzen erhalten / Auslieferungen (ohne Kommunen) — **nur bis inkl. letzten abgeschlossenen Monat.**
+- **Trend:** monatlich, endet beim letzten abgeschlossenen Monat.
+- **Der laufende Monat wird NIE aufgenommen.** Gleiches Beispiel wie 3.1.
 - **Ziel:** 90%, Schwellen gruen 90 gelb 65
 
 ### 3.3 KPI 3 NPS Institutionsbetreuung
-- **Quellen:** BEIDE Umfrage-Excels zusammen (Fahrzeug + Torzähler)
+- **Quellen (aktuell):** BEIDE Umfrage-Excels zusammen: `Kopie von Wie läufts mit Eurem Fahrzeug Anhänger.xlsx` + `Kopie von Wie läufts mit Eurem Torzähler.xlsx`
+- **NICHT nutzen:** `NPS_Institutionsbetreuung-3.xlsx` — Legacy-Datei, endet Sep 2025. Ignorieren.
 - **Klassifikation:**
   - Numerisch: 9-10 Promotor, 7-8 Passiv, 0-6 Detraktor
   - "Ich würde Euch uneingeschränkt weiterempfehlen!" → Promotor (10)
   - "Auf gar keinen Fall!" → Detraktor (0)
   - Leere NPS-Antworten überspringen
 - **Formel:** `(Promotoren - Detraktoren) / Gesamt × 100`
-- **Trend:** pro Monat (Basis: `date_created`)
+- **Intervall:** quartalsweise erhoben (Q1 = Jan-Mrz, Q2 = Apr-Jun usw.)
+- **Trend:** **maximal die letzten 3 Quartale mit Daten, frühestens ab Q2 2025.** Keine 2024-Daten anzeigen. Quartale ohne Rückläufe überspringen.
+- **Q2 26 vorläufig-Regel:** solange Juni-Rückläufe fehlen, aus Apr+Mai berechnen und als „(vorläufig)" markieren. Wenn keine neuen Rückläufe seit letztem Lauf: bestehende data.js-Werte unverändert lassen.
 - **Ziel:** 60, Schwellen gruen 60 gelb 30
 - **Intervall-Label:** "quartalsweise"
 
@@ -108,7 +118,7 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 - **Quelle:** `ConversionRate.xlsx` → Sheet `Vertragseingänge` (Rohdaten, NICHT die KW-Tabelle im Dashboard-Sheet)
 - **Excel-Struktur ab Juli 2026:** Header `KW | Datum | Jahr | Monat | Verkäufer | Institution | Produktart | Quelle | Kampagne | Status | Bemerkung`. Nutzer trägt aus: Datum, Jahr, Monat, Verkäufer, Institution, Produktart, Quelle, Kampagnen-Monat. KW muss aus Datum berechnet werden (ISO-Kalenderwoche).
 - **Team-Total:** alle Zeilen mit gefülltem Verkäufer zählen (auch ohne Nr., auch Nachträge)
-- **aktuell** = Total-Verträge / Anzahl KWs mit ≥1 Vertrag (bis inkl. letzter abgeschlossener KW)
+- **aktuell** = Total-Verträge / **Anzahl KWs mit ≥1 Vertrag** (bis inkl. letzter abgeschlossener KW). **Nicht** durch die Gesamtzahl aller KWs teilen — nur durch aktive KWs.
 - **Trend:** pro KW ab KW 2, bis inkl. letzter abgeschlossener KW. Laufende Woche IMMER weglassen.
 - **Mitarbeiter-Blöcke:** nur Fatima, Gabriella, David
 - **Wichtig (Erfassungsverzug):** Fatima-Werte werden manchmal manuell korrigiert (bis zu 3 Wochen Verzug). Auto-Update übernimmt Excel-Ist. Bei Diskrepanz zur vorherigen data.js: im Commit-Log dokumentieren.
@@ -215,6 +225,7 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 - 22.07.2026: Juli-Werte aus KPI 1+2 raus (Juli läuft noch)
 - 23.07.2026: Grafik-Format-Fix-Regel dokumentiert
 - 23.07.2026: RULES.md als Referenz für Auto-Update-Agent erstellt
+- 30.07.2026: Regel geschärft — KPI 1+2: aktueller Monat NIE einbeziehen (auch nicht in `aktuell`). NPS: nur Quartale ab Q2 25, `NPS_Institutionsbetreuung-3.xlsx` nicht mehr als Quelle. KPI 5: `aktuell` durch KWs mit ≥1 Vertrag teilen, nicht durch Gesamt-KW-Zahl.
 
 ---
 
