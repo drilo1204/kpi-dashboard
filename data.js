@@ -8,7 +8,7 @@
 const DASHBOARD_CONFIG = {
   titel: "Partner & Friends – KPI Dashboard",
   letzteAktualisierung: "04.08.2026",
-  aktuelleKW: "KW 31",
+  aktuelleKW: "KW 32",
   aktuellerMonat: "August 2026",
 };
 
@@ -200,10 +200,11 @@ const KPI_CONVERSION = {
 // KPI 5: Vertragseingänge pro Woche
 // Intervall: wöchentlich
 // Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx → Sheet Vertragseingänge (Rohdaten)
-// Berechnung aktuell: 185 Verträge / 30 KWs mit ≥1 Vertrag = 6.2 Verträge/Woche
+// Berechnung aktuell: 196 Verträge / 31 KWs mit ≥1 Vertrag = 6.3 Verträge/Woche
 //   (Nur KWs mit mindestens einem Vertrag zählen als Nenner, nicht alle KWs)
-// Trend: pro KW ab KW 2 bis inkl. KW 30 (letzte abgeschlossene KW)
-//   KW 31 läuft noch → nicht aufnehmen
+// Trend: pro KW ab KW 2 bis inkl. KW 31 (letzte abgeschlossene KW)
+//   KW 32 läuft noch → nicht aufnehmen
+// KW 31 (Nachtrag 04.08.): 11 Verträge — David 10, Drilan 1
 // Mitarbeiter-Quartale: Q1 (Jan–Mrz), Q2 (Apr–Jun) | Q3 (Juli läuft) nicht zeigen
 // ============================================================
 const KPI_VERTRAGSEINGAENGE_WOCHE = {
@@ -215,7 +216,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   prioritaet: "prio",
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 10, gelb: 7 },
-  aktuell: 6.2,
+  aktuell: 6.3,
   ziel: 10,
   showLetzteWochen: 3,
   mitarbeiterOhneAmpel: true,
@@ -235,7 +236,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
       ],
     },
     david: {
-      aktuell: 25,
+      aktuell: 35,  // 25 + 10 aus KW 31 (Nachtrag 04.08.)
       quartale: [
         { periode: "Apr-Jun", wert: 7 },
       ],
@@ -271,6 +272,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
     { periode: "KW 28", wert: 4 },
     { periode: "KW 29", wert: 10 },
     { periode: "KW 30", wert: 4 },
+    { periode: "KW 31", wert: 11 },
   ],
   storyText: "Ziel 10 Verträge/Woche weiter aktiv verfolgen",
   handlung: {
