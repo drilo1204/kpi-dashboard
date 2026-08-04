@@ -7,9 +7,9 @@
 
 const DASHBOARD_CONFIG = {
   titel: "Partner & Friends – KPI Dashboard",
-  letzteAktualisierung: "30.07.2026",
-  aktuelleKW: "KW 30",
-  aktuellerMonat: "Juli 2026",
+  letzteAktualisierung: "04.08.2026",
+  aktuelleKW: "KW 31",
+  aktuellerMonat: "August 2026",
 };
 
 // ------------------------------------------------------------
@@ -45,17 +45,17 @@ const KPI_GOOGLE = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 65, gelb: 50 },
-  aktuell: 58.1,  // 43 von 74 Auslieferungen Jan-Jun (Stadt Göttingen ausgeklammert; Juli läuft noch)
+  aktuell: 54.0,  // 47 von 87 Auslieferungen Jan-Jul (Stadt Göttingen ausgeklammert)
   ziel: 65,
   showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 78.6 },
-    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
+    { periode: "Mrz 26", wert: 76.2 },
     { periode: "Apr 26", wert: 47.1 },
-    { periode: "Mai 26", wert: 42.9 },
+    { periode: "Mai 26", wert: 57.1 },
     { periode: "Jun 26", wert: 30.8 },
-    // Jul 26 laeuft noch – erst nach Monatsabschluss aufnehmen (RULES 0.2 + 3.1)
+    { periode: "Jul 26", wert: 25.0 },
   ],
   storyText: "Bewertungen weiter aktiv einholen — Ziel 65 % rückt näher",
   handlung: {
@@ -78,17 +78,17 @@ const KPI_REFERENZ = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 90, gelb: 65 },
-  aktuell: 86.5,  // 64 von 74 Auslieferungen Jan-Jun (Stadt Göttingen ausgeklammert; Juli läuft noch)
+  aktuell: 86.2,  // 75 von 87 Auslieferungen Jan-Jul (Stadt Göttingen ausgeklammert)
   ziel: 90,
   showLetzteWochen: 3,
   trend: [
     { periode: "Jan 26", wert: 33.3 },
     { periode: "Feb 26", wert: 92.9 },
-    { periode: "Mrz 26", wert: 80 },   // ohne Stadt Göttingen: 16/20
+    { periode: "Mrz 26", wert: 81.0 },
     { periode: "Apr 26", wert: 94.1 },
     { periode: "Mai 26", wert: 100 },
     { periode: "Jun 26", wert: 84.6 },
-    // Jul 26 laeuft noch – erst nach Monatsabschluss aufnehmen (RULES 0.2 + 3.2)
+    { periode: "Jul 26", wert: 83.3 },
   ],
   storyText: "Konstant hohe Referenzquote — 90 %-Ziel in Reichweite",
   handlung: null,
@@ -100,7 +100,7 @@ const KPI_REFERENZ = {
 // Quellen:
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Fahrzeug  Anhänger.xlsx
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Torzähler.xlsx
-// Q2 26: Erhebung läuft noch – vorläufiger Wert aus Apr+Mai (17 Rückläufe).
+// Q2 26: vorläufig (Juni-Rückläufe noch ausstehend)
 // ============================================================
 const KPI_NPS = {
   label: "NPS Institutionsbetreuung",
@@ -115,9 +115,9 @@ const KPI_NPS = {
   ziel: 60,
   showLetzteWochen: 3,
   trend: [
-    { periode: "Q2 25", wert: 71.4 },   // 5 Prom / 2 Pass / 0 Detr (7 Rückläufe)
-    { periode: "Q3 25", wert: 75.0 },   // 3 Prom / 1 Pass / 0 Detr (4 Rückläufe)
-    { periode: "Q2 26", wert: 70.6 },   // vorläufig – Juni-Erhebung ausstehend
+    { periode: "Q2 25", wert: 71.4 },
+    { periode: "Q3 25", wert: 75.0 },
+    { periode: "Q2 26", wert: 70.6 },
   ],
   details: {
     rueckmeldungen: 17,
@@ -149,7 +149,7 @@ const KPI_CONVERSION = {
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 20, gelb: 10 },
   ziel: 20,
-  teamAktuell: 15.3,  // 98 Verträge / 643 Leads (Fatima, Gabriella, David; ohne Juli Drilan)
+  teamAktuell: 15.0,  // 106 Verträge / 706 Leads (Fatima, Gabriella, David; Jan-Jul)
   showLetzteWochen: 2,
   teamTrend: [
     { periode: "Jan 26", wert: 8.9 },
@@ -157,6 +157,7 @@ const KPI_CONVERSION = {
     { periode: "Mrz 26", wert: 5.6 },
     { periode: "Mai 26", wert: 12.5 },
     { periode: "Jun 26", wert: 37.4 },
+    { periode: "Jul 26", wert: 4.1 },
   ],
   storyText: "Starkes Juni-Ergebnis: Team-Peak 37 % — Fatima und David legen kräftig zu",
   handlung: {
@@ -165,7 +166,7 @@ const KPI_CONVERSION = {
   },
   mitarbeiter: {
     fatima: {
-      aktuell: 12.6,  // 49 / 388
+      aktuell: 14.4,  // 57 / 396
       quartale: [
         { periode: "Jan-Mrz", wert: 10.0 },
         { periode: "Apr-Jun", wert: 15.7 },
@@ -179,7 +180,7 @@ const KPI_CONVERSION = {
       ],
     },
     david: {
-      aktuell: 30.4,  // 41 / 135 (Mai+Jun+Juli)
+      aktuell: 21.6,  // 41 / 190 (Mai+Jun+Jul)
       quartale: [
         { periode: "Apr-Jun", wert: 28.0 },
       ],
@@ -191,7 +192,7 @@ const KPI_CONVERSION = {
 // KPI 5: Vertragseingänge pro Woche
 // Intervall: wöchentlich
 // Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx → Sheet Vertragseingänge (Rohdaten)
-// KW 30 läuft noch → nicht aufnehmen
+// KW 31 läuft noch → nicht aufnehmen
 // ============================================================
 const KPI_VERTRAGSEINGAENGE_WOCHE = {
   label: "Vertragseingänge pro Woche",
@@ -202,27 +203,27 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   prioritaet: "prio",
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 10, gelb: 7 },
-  aktuell: 6.8,  // 178 Verträge / 26 KWs mit ≥1 Vertrag (ohne laufende KW 30)
+  aktuell: 6.2,  // 185 Verträge / 30 KWs mit ≥1 Vertrag (ohne laufende KW 31)
   ziel: 10,
   showLetzteWochen: 3,
   mitarbeiterOhneAmpel: true,
   mitarbeiter: {
     fatima: {
-      aktuell: 72,   // Total Verträge 2026 (Rohdaten, ohne laufende KW 30)
+      aktuell: 76,
       quartale: [
         { periode: "Jan-Mrz", wert: 34 },
         { periode: "Apr-Jun", wert: 31 },
       ],
     },
     gabriella: {
-      aktuell: 42,
+      aktuell: 43,
       quartale: [
         { periode: "Jan-Mrz", wert: 14 },
         { periode: "Apr-Jun", wert: 23 },
       ],
     },
     david: {
-      aktuell: 16,
+      aktuell: 25,
       quartale: [
         { periode: "Apr-Jun", wert: 7 },
       ],
@@ -255,8 +256,9 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
     { periode: "KW 25", wert: 0 },
     { periode: "KW 26", wert: 19 },
     { periode: "KW 27", wert: 19 },
-    { periode: "KW 28", wert: 5 },
+    { periode: "KW 28", wert: 4 },
     { periode: "KW 29", wert: 10 },
+    { periode: "KW 30", wert: 4 },
   ],
   storyText: "Ziel 10 Verträge/Woche weiter aktiv verfolgen",
   handlung: {
@@ -383,7 +385,7 @@ const KPI_GRAFIK = {
   verantwortlich: "Institutionsbetreuung",
   invertiert: true,
   schwpiegel: { gruen: 60, gelb: 80 },
-  aktuell: 70.2,  // Ø 2026 (55 Projekte)
+  aktuell: 70.2,
   ziel: 60,
   showLetzteWochen: 3,
   trend: [
