@@ -37,6 +37,19 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 - **Rohdaten-Sheet immer bevorzugen** vor aggregierten KW-Tabellen (Excel-Aggregate hinken oft hinterher)
 - Bei Diskrepanzen: Der Rohdaten-Wert ist die Wahrheit, KW-Tabellenwert wird ignoriert
 
+### 0.6 Datum-Kontext (verbindlich, vom Skript vorgegeben)
+Der Auto-Update-Automat injiziert bei jedem Lauf einen **DATUM-KONTEXT-Block** in den Prompt, mit deterministisch berechneten Werten:
+
+- `heute` (heutiges Datum im Format DD.MM.YYYY)
+- `aktuelle_kw_label` (z. B. `KW 32`) → **läuft noch, NIE im Trend oder Aggregate**
+- `letzte_abg_kw_label` (z. B. `KW 31`) → **muss im Trend enthalten sein**
+- `aktueller_monat_label` (z. B. `August 2026`) → **läuft noch, NIE im Trend oder Aggregate**
+- `letzter_monat_label` (z. B. `Juli 2026`) → **muss im Trend enthalten sein**
+
+**Diese Werte sind verbindlich. Nicht selbst nachrechnen, nicht aus Excel-Zellen ableiten, nicht raten.** Wenn der Prompt-Kontext sagt „aktuelle KW = KW 32", dann ist KW 31 abgeschlossen und **muss** in `KPI_VERTRAGSEINGAENGE_WOCHE.trend` stehen — auch wenn Excel-Aggregate (Dashboard-Sheet) noch 0 zeigen. Rohdaten sind maßgeblich.
+
+`DASHBOARD_CONFIG.aktuelleKW`, `DASHBOARD_CONFIG.aktuellerMonat` und `DASHBOARD_CONFIG.letzteAktualisierung` werden aus dem Datum-Kontext übernommen.
+
 ---
 
 ## 1. Datei-Struktur
@@ -117,9 +130,9 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 ### 3.5 KPI 5 Vertragseingänge pro Woche
 - **Quelle:** `ConversionRate.xlsx` → Sheet `Vertragseingänge` (Rohdaten, NICHT die KW-Tabelle im Dashboard-Sheet)
 - **Excel-Struktur ab Juli 2026:** Header `KW | Datum | Jahr | Monat | Verkäufer | Institution | Produktart | Quelle | Kampagne | Status | Bemerkung`. Nutzer trägt aus: Datum, Jahr, Monat, Verkäufer, Institution, Produktart, Quelle, Kampagnen-Monat. KW muss aus Datum berechnet werden (ISO-Kalenderwoche).
-- **Team-Total:** alle Zeilen mit gefülltem Verkäufer zählen (auch ohne Nr., auch Nachträge)
-- **aktuell** = Total-Verträge / **Anzahl KWs mit ≥1 Vertrag** (bis inkl. letzter abgeschlossener KW). **Nicht** durch die Gesamtzahl aller KWs teilen — nur durch aktive KWs.
-- **Trend:** pro KW ab KW 2, bis inkl. letzter abgeschlossener KW. Laufende Woche IMMER weglassen.
+- **Team-Total:** alle Zeilen mit gefülltem Verkäufer zählen (auch ohne Nr., auch Nachträge, auch mit leerer KW-Spalte — KW aus Datum ableiten)
+- **aktuell** = Total-Verträge / **Anzahl KWs mit ≥1 Vertrag** (bis inkl. letzter abgeschlossener KW, siehe 0.6). **Nicht** durch die Gesamtzahl aller KWs teilen — nur durch aktive KWs.
+- **Trend:** pro KW ab KW 2, bis inkl. `letzte_abg_kw_label` aus dem Datum-Kontext (0.6). Aktuelle laufende KW IMMER weglassen.
 - **Mitarbeiter-Blöcke:** nur Fatima, Gabriella, David
 - **Wichtig (Erfassungsverzug):** Fatima-Werte werden manchmal manuell korrigiert (bis zu 3 Wochen Verzug). Auto-Update übernimmt Excel-Ist. Bei Diskrepanz zur vorherigen data.js: im Commit-Log dokumentieren.
 - **mitarbeiterOhneAmpel:** true (Chips neutral, nur Delta-Pfeil farbig)
@@ -226,6 +239,7 @@ Das Dashboard wird auch von den Verkäufern selbst gesehen. Deshalb:
 - 23.07.2026: Grafik-Format-Fix-Regel dokumentiert
 - 23.07.2026: RULES.md als Referenz für Auto-Update-Agent erstellt
 - 30.07.2026: Regel geschärft — KPI 1+2: aktueller Monat NIE einbeziehen (auch nicht in `aktuell`). NPS: nur Quartale ab Q2 25, `NPS_Institutionsbetreuung-3.xlsx` nicht mehr als Quelle. KPI 5: `aktuell` durch KWs mit ≥1 Vertrag teilen, nicht durch Gesamt-KW-Zahl.
+- 04.08.2026: Regel 0.6 „Datum-Kontext" eingeführt. Grund: Automat vom 04.08. hat KW 31 fälschlich als „läuft noch" markiert. Ab jetzt injiziert das Python-Skript heute/aktuelle-KW/letzte-abg-KW/Monat verbindlich, AI darf diese Werte nicht ableiten oder überschreiben.
 
 ---
 
