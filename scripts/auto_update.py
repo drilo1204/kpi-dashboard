@@ -7,7 +7,7 @@ import io
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import anthropic
@@ -20,11 +20,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_JS = REPO_ROOT / "data.js"
 RULES_MD = REPO_ROOT / "RULES.md"
 DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID", "1x1RW-0GIZw8hZs4ZyxftKRcbFCbHhkzf")
-# claude-sonnet-4-5 = stabil, ausreichend fuer diese Aufgabe.
-# Kann per Repo-Variable ANTHROPIC_MODEL ueberschrieben werden.
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 MAX_ROWS_PER_SHEET = 300
 MAX_TOKENS_OUT = 16000
+
+MONATSNAMEN = ["", "Januar", "Februar", "März", "April", "Mai", "Juni",
+               "Juli", "August", "September", "Oktober", "November", "Dezember"]
+MONATSNAMEN_KURZ = ["", "Jan", "Feb", "Mrz", "Apr", "Mai", "Jun",
+                    "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
 
 
 def log(msg: str) -> None:
@@ -37,6 +40,39 @@ def set_output(key: str, value: str) -> None:
         return
     with open(out, "a", encoding="utf-8") as fh:
         fh.write(f"{key}={value}\n")
+
+
+def compute_datum_kontext() -> dict:
+    """Berechnet Datum-Kontext deterministisch aus heutigem UTC-Datum.
+    Wird explizit in den Anthropic-Prompt injiziert, damit die AI nicht raten muss."""
+    heute = datetime.now(timezone.utc).date()
+    iso_year, iso_week, iso_weekday = heute.isocalendar()
+    if iso_weekday == 7:
+        letzte_abg_year, letzte_abg_week = iso_year, iso_week
+    else:
+        letzter_sonntag = heute - timedelta(days=iso_weekday)
+        ly, lw, _ = letzter_sonntag.isocalendar()
+        letzte_abg_year, letzte_abg_week = ly, lw
+
+    if heute.month == 1:
+        letzter_monat_nr = 12
+        letzter_monat_jahr = heute.year - 1
+    else:
+        letzter_monat_nr = heute.month - 1
+        letzter_monat_jahr = heute.year
+
+    return {
+        "heute": heute.strftime("%d.%m.%Y"),
+        "wochentag": iso_weekday,
+        "aktuelle_kw_nr": iso_week,
+        "aktuelle_kw_label": f"KW {iso_week}",
+        "letzte_abg_kw_nr": letzte_abg_week,
+        "letzte_abg_kw_label": f"KW {letzte_abg_week}",
+        "aktueller_monat_label": f"{MONATSNAMEN[heute.month]} {heute.year}",
+        "aktueller_monat_kurz": f"{MONATSNAMEN_KURZ[heute.month]} {str(heute.year)[-2:]}",
+        "letzter_monat_label": f"{MONATSNAMEN[letzter_monat_nr]} {letzter_monat_jahr}",
+        "letzter_monat_kurz": f"{MONATSNAMEN_KURZ[letzter_monat_nr]} {str(letzter_monat_jahr)[-2:]}",
+    }
 
 
 def get_drive_service():
@@ -104,19 +140,24 @@ def format_excel_section(excel_data: list) -> str:
     return "\n".join(parts)
 
 
-def build_prompt(rules: str, current_data_js: str, excel_data: list) -> str:
-    heute = datetime.now(timezone.utc).strftime("%d.%m.%Y")
+def build_prompt(rules: str, current_data_js: str, excel_data: list, ctx: dict) -> str:
     excel_section = format_excel_section(excel_data)
     header = (
         "Du aktualisierst die data.js des KPI-Dashboards von Brunner Mobil. "
         "Halte dich strikt an die RULES.md.\n\n"
-        "WICHTIG - Ausgabeformat:\n"
+        "=== DATUM-KONTEXT (verbindlich, deterministisch berechnet - NICHT raten!) ===\n"
+        f"- Heute: {ctx['heute']} (ISO-Wochentag {ctx['wochentag']}: 1=Mo ... 7=So)\n"
+        f"- Aktuelle Kalenderwoche: {ctx['aktuelle_kw_label']} - LAEUFT NOCH. NIEMALS in Trend oder Aggregate aufnehmen.\n"
+        f"- Letzte abgeschlossene Kalenderwoche: {ctx['letzte_abg_kw_label']} - GEHOERT ins Dashboard, muss im Trend vorkommen.\n"
+        f"- Aktueller Monat: {ctx['aktueller_monat_label']} ({ctx['aktueller_monat_kurz']}) - LAEUFT NOCH. NIEMALS in Trend oder Aggregate.\n"
+        f"- Letzter abgeschlossener Monat: {ctx['letzter_monat_label']} ({ctx['letzter_monat_kurz']}) - GEHOERT ins Dashboard.\n"
+        f"- Setze DASHBOARD_CONFIG.aktuelleKW = \"{ctx['aktuelle_kw_label']}\", DASHBOARD_CONFIG.aktuellerMonat = \"{ctx['aktueller_monat_label']}\", DASHBOARD_CONFIG.letzteAktualisierung = \"{ctx['heute']}\".\n"
+        "\n"
+        "=== AUSGABEFORMAT ===\n"
         "- Gib NUR den vollstaendigen neuen data.js-Inhalt zurueck.\n"
         "- Kein Markdown-Fence, kein Vor- oder Nachtext, keine Erklaerung.\n"
         "- Behalte die vorhandene Struktur bei (alle KPI-Konstanten, Reihenfolge, Kommentare mit Rechenweg).\n"
-        f"- Aktualisiere `letzteAktualisierung` in DASHBOARD_CONFIG auf das heutige Datum: {heute}.\n"
         "- Wenn ein Wert unklar oder die Datengrundlage duenn ist: bestehenden Wert behalten und in Kommentar begruenden.\n"
-        "- Laufende Perioden (aktueller Monat/Woche) NIE als Trend-Datenpunkt aufnehmen (siehe RULES 0.2).\n"
     )
     footer = (
         "\nGib jetzt die neue data.js aus - beginnend mit dem Kommentar '// ===...' "
@@ -135,8 +176,6 @@ def build_prompt(rules: str, current_data_js: str, excel_data: list) -> str:
 
 
 def call_anthropic(prompt: str) -> tuple[str, str, dict]:
-    """Ruft Anthropic auf und liefert (text, stop_reason, usage_dict).
-    Bei API-Fehler wird die Exception nach oben durchgereicht."""
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     response = client.messages.create(
         model=ANTHROPIC_MODEL,
@@ -195,6 +234,9 @@ def validate_data_js(text: str) -> tuple[bool, str]:
 
 
 def main() -> int:
+    ctx = compute_datum_kontext()
+    log(f"[0/7] Datum-Kontext: {ctx['heute']} | Aktuell {ctx['aktuelle_kw_label']} + {ctx['aktueller_monat_label']} | Letzte abg. {ctx['letzte_abg_kw_label']} + {ctx['letzter_monat_label']}")
+
     log(f"[1/7] Google Drive verbinden (Ordner {DRIVE_FOLDER_ID}) ...")
     drive = get_drive_service()
 
@@ -224,7 +266,7 @@ def main() -> int:
     current_data_js = DATA_JS.read_text(encoding="utf-8")
 
     log(f"[5/7] Anthropic aufrufen (Modell {ANTHROPIC_MODEL}) ...")
-    prompt = build_prompt(rules, current_data_js, excel_data)
+    prompt = build_prompt(rules, current_data_js, excel_data, ctx)
     log(f"      Prompt-Groesse: {len(prompt)} Zeichen (grob {len(prompt)//4} Tokens).")
     try:
         raw_text, stop_reason, usage = call_anthropic(prompt)
