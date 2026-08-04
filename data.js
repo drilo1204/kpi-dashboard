@@ -35,6 +35,7 @@ const KATEGORIEN = {
 // KPI 1: Google-Bewertungsquote
 // Intervall: monatlich
 // Quelle: 02_Excel_Quelldaten/Google-Bewertungen_Referenzen_Auslieferungen.xlsx
+// Berechnung: 47 von 87 Auslieferungen Jan–Jul 2026 (ohne Stadt Göttingen)
 // ============================================================
 const KPI_GOOGLE = {
   label: "Google-Bewertungsquote",
@@ -45,7 +46,7 @@ const KPI_GOOGLE = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 65, gelb: 50 },
-  aktuell: 54.0,  // 47 von 87 Auslieferungen Jan-Jul (Stadt Göttingen ausgeklammert)
+  aktuell: 54.0,
   ziel: 65,
   showLetzteWochen: 3,
   trend: [
@@ -68,6 +69,7 @@ const KPI_GOOGLE = {
 // KPI 2: Referenzquote
 // Intervall: monatlich
 // Quelle: 02_Excel_Quelldaten/Google-Bewertungen_Referenzen_Auslieferungen.xlsx
+// Berechnung: 75 von 87 Auslieferungen Jan–Jul 2026 (ohne Stadt Göttingen)
 // ============================================================
 const KPI_REFERENZ = {
   label: "Referenzquote",
@@ -78,7 +80,7 @@ const KPI_REFERENZ = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 90, gelb: 65 },
-  aktuell: 86.2,  // 75 von 87 Auslieferungen Jan-Jul (Stadt Göttingen ausgeklammert)
+  aktuell: 86.2,
   ziel: 90,
   showLetzteWochen: 3,
   trend: [
@@ -100,7 +102,10 @@ const KPI_REFERENZ = {
 // Quellen:
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Fahrzeug  Anhänger.xlsx
 //   - 02_Excel_Quelldaten/Kopie von Wie läufts mit Eurem Torzähler.xlsx
-// Q2 26: vorläufig (Juni-Rückläufe noch ausstehend)
+// Berechnung: Q2 26 aus beiden Umfragen zusammen: 17 Rückmeldungen
+//   13 Promotoren (9-10), 3 Passive (7-8), 1 Kritiker (0-6)
+//   NPS = (13-1)/17 × 100 = 70.6
+// Hinweis: NPS_Institutionsbetreuung-3.xlsx NICHT als Quelle (endet Sep 2025)
 // ============================================================
 const KPI_NPS = {
   label: "NPS Institutionsbetreuung",
@@ -111,7 +116,7 @@ const KPI_NPS = {
   prioritaet: "sek",
   verantwortlich: "Institutionsbetreuung",
   schwpiegel: { gruen: 60, gelb: 30 },
-  aktuell: 70.6,  // Q2 26 vorläufig – Juni-Rückläufe noch einzuholen
+  aktuell: 70.6,
   ziel: 60,
   showLetzteWochen: 3,
   trend: [
@@ -125,7 +130,7 @@ const KPI_NPS = {
     passive: 3,
     kritiker: 1,
   },
-  storyText: "Q2 26 vorläufig 70,6 · Vorjahr Q2 25: 71,4 (−0,8 pp) — Juni-Rückläufe noch einzuholen",
+  storyText: "Q2 26: 70,6 · Vorjahr Q2 25: 71,4 (−0,8 pp) — starkes Ergebnis",
   handlung: {
     rot: "Kritisches Feedback direkt zurückspiegeln, Ursache dokumentieren",
     gelb: "Neutrale Rückmeldungen aktiv nachbereiten",
@@ -135,9 +140,12 @@ const KPI_NPS = {
 // ============================================================
 // KPI 4: Leads Conversion Rate
 // Intervall: wöchentlich
-// Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx
-// Stand 15.07.2026: Reife-Konzept + 5-V-Schwelle deaktiviert (auf Wunsch).
-// Alle 3 Hauptverkäufer werden mit Total-Werten seit Jan 2026 gezeigt.
+// Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx → Sheet Leads Rohdaten
+// Stand 04.08.2026: Reife-Konzept + 5-V-Schwelle deaktiviert
+// Alle 3 Hauptverkäufer mit Total-Werten seit Jan 2026
+// Berechnung teamAktuell: 106 Verträge / 706 Leads = 15.0 %
+// Berechnung teamTrend: nur abgeschlossene Monate (April ausgelassen: nur 2 Leads)
+// Mitarbeiter-Quartale: Q1 (Jan–Mrz), Q2 (Apr–Jun) | Juli läuft noch → Q3 nicht zeigen
 // ============================================================
 const KPI_CONVERSION = {
   label: "Leads Conversion Rate",
@@ -149,7 +157,7 @@ const KPI_CONVERSION = {
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 20, gelb: 10 },
   ziel: 20,
-  teamAktuell: 15.0,  // 106 Verträge / 706 Leads (Fatima, Gabriella, David; Jan-Jul)
+  teamAktuell: 15.0,
   showLetzteWochen: 2,
   teamTrend: [
     { periode: "Jan 26", wert: 8.9 },
@@ -166,21 +174,21 @@ const KPI_CONVERSION = {
   },
   mitarbeiter: {
     fatima: {
-      aktuell: 14.4,  // 57 / 396
+      aktuell: 14.4,
       quartale: [
         { periode: "Jan-Mrz", wert: 10.0 },
         { periode: "Apr-Jun", wert: 15.7 },
       ],
     },
     gabriella: {
-      aktuell: 6.7,  // 8 / 120
+      aktuell: 6.7,
       quartale: [
         { periode: "Jan-Mrz", wert: 5.6 },
         { periode: "Apr-Jun", wert: 10.0 },
       ],
     },
     david: {
-      aktuell: 21.6,  // 41 / 190 (Mai+Jun+Jul)
+      aktuell: 21.6,
       quartale: [
         { periode: "Apr-Jun", wert: 28.0 },
       ],
@@ -192,7 +200,11 @@ const KPI_CONVERSION = {
 // KPI 5: Vertragseingänge pro Woche
 // Intervall: wöchentlich
 // Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx → Sheet Vertragseingänge (Rohdaten)
-// KW 31 läuft noch → nicht aufnehmen
+// Berechnung aktuell: 185 Verträge / 30 KWs mit ≥1 Vertrag = 6.2 Verträge/Woche
+//   (Nur KWs mit mindestens einem Vertrag zählen als Nenner, nicht alle KWs)
+// Trend: pro KW ab KW 2 bis inkl. KW 30 (letzte abgeschlossene KW)
+//   KW 31 läuft noch → nicht aufnehmen
+// Mitarbeiter-Quartale: Q1 (Jan–Mrz), Q2 (Apr–Jun) | Q3 (Juli läuft) nicht zeigen
 // ============================================================
 const KPI_VERTRAGSEINGAENGE_WOCHE = {
   label: "Vertragseingänge pro Woche",
@@ -203,7 +215,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
   prioritaet: "prio",
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 10, gelb: 7 },
-  aktuell: 6.2,  // 185 Verträge / 30 KWs mit ≥1 Vertrag (ohne laufende KW 31)
+  aktuell: 6.2,
   ziel: 10,
   showLetzteWochen: 3,
   mitarbeiterOhneAmpel: true,
@@ -371,9 +383,10 @@ const KPI_VERTRAEGE = {
 // ============================================================
 // KPI 8: Grafikabschluss bis Auslieferung
 // Intervall: monatlich
-// Quelle: 02_Excel_Quelldaten/Grafikabschluss_bis_Auslieferung.xlsx
+// Quelle: 02_Excel_Quelldaten/Grafikabschluss_bis_Auslieferung.xlsx → Sheet Rohdaten
 // ACHTUNG: NIEDRIG = GUT (invertiert)
-// Berechnung: nur 2026-Auslieferungen (55 Projekte), Ø 70.2 Tage
+// Berechnung: nur 2026-Auslieferungen (55 Projekte Jan–Apr), Ø 70.2 Tage
+// Trend: monatlich Jan–Apr (Mai–Jul noch keine Auslieferungen in 2026)
 // ============================================================
 const KPI_GRAFIK = {
   label: "Grafikabschluss bis Auslieferung",
