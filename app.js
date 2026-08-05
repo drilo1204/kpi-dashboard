@@ -37,6 +37,52 @@ function diffSuffix(einheit) {
   return einheit === "%" ? " pp" : "";
 }
 
+// ---- Ziel-Chip (prominent neben aktuell) ----
+function zielChipHTML(kpi) {
+  const zielFmt = formatWert(kpi.ziel, kpi.einheit);
+  const suf = einheitSuffix(kpi.einheit);
+  return `<span class="kpi-ziel-chip"><span class="kpi-ziel-label">Ziel</span><strong>${zielFmt}${suf}</strong></span>`;
+}
+
+// ---- Trend-Chip (Vergleich 1. vs 2. Hälfte der letzten N Perioden) ----
+// Nach Cole Nussbaumer Knaflic: "ein Signal pro Element" – Richtung + Prozent.
+function computeTrendChip(kpi, trend) {
+  if (!trend || trend.length < 4) return "";
+  const werte = trend.map(t => t.wert);
+  const n = werte.length;
+  const half = Math.floor(n / 2);
+  const first = werte.slice(0, half);
+  const second = werte.slice(-half);
+  const avgFirst = first.reduce((a, b) => a + b, 0) / first.length;
+  const avgSecond = second.reduce((a, b) => a + b, 0) / second.length;
+  const diff = avgSecond - avgFirst;
+  const percent = avgFirst === 0 ? 0 : (diff / avgFirst) * 100;
+  const absPercent = Math.round(Math.abs(percent));
+  const invert = !!kpi.invertiert;
+
+  let cls, arrow;
+  if (absPercent < 3) {
+    cls = "neutral";
+    arrow = "&#9654;";
+  } else if (diff > 0) {
+    cls = invert ? "down" : "up";
+    arrow = "&#9650;";
+  } else {
+    cls = invert ? "up" : "down";
+    arrow = "&#9660;";
+  }
+
+  let label;
+  if (kpi.intervall === "wöchentlich") label = `${n}W-Trend`;
+  else if (kpi.intervall === "monatlich") label = `${n}M-Trend`;
+  else if (kpi.intervall === "quartalsweise") label = `${n}Q-Trend`;
+  else label = `${n}-Trend`;
+
+  const sign = diff > 0 ? "+" : "−";
+  const tooltip = `Vergleich: Ø letzte ${second.length} vs. Ø erste ${first.length} Perioden`;
+  return `<span class="trend-chip ${cls}" title="${tooltip}"><span class="delta-arrow">${arrow}</span> ${label}: ${sign}${absPercent} %</span>`;
+}
+
 // ---- Delta-Zeile: ein Vergleichs-Chip zum Vormonat/Vorwoche ----
 function deltaZeile(trend, kpi) {
   if (!trend || trend.length < 2) return "";
@@ -107,18 +153,21 @@ function storyHTML(kpi) {
   return `<div class="story-text">${kpi.storyText}</div>`;
 }
 
-// ---- Sparkline SVG mit Hover-Tooltips (natives SVG <title>) ----
-function sparklineSVG(daten, farbe, breite, hoehe, einheit) {
+// ---- Sparkline SVG mit Ziellinie (Bullet-Chart-Prinzip nach Stephen Few) + Hover-Tooltips ----
+function sparklineSVG(daten, farbe, breite, hoehe, einheit, ziel) {
   if (!daten || daten.length < 2) return "";
   const werte = daten.map(d => d.wert);
   const min = Math.min(...werte);
   const max = Math.max(...werte);
-  const range = max - min || 1;
+  // Ziel ins Wertespektrum einbeziehen, damit die Ziellinie immer sichtbar ist
+  const effMin = ziel != null ? Math.min(min, ziel) : min;
+  const effMax = ziel != null ? Math.max(max, ziel) : max;
+  const range = (effMax - effMin) || 1;
   const pad = 4;
 
   const punkte = werte.map((w, i) => {
     const x = pad + (i / (werte.length - 1)) * (breite - 2 * pad);
-    const y = hoehe - pad - ((w - min) / range) * (hoehe - 2 * pad);
+    const y = hoehe - pad - ((w - effMin) / range) * (hoehe - 2 * pad);
     return { x, y, wert: w, periode: daten[i].periode };
   });
 
@@ -130,6 +179,12 @@ function sparklineSVG(daten, farbe, breite, hoehe, einheit) {
   const polyline = punkte.map(p => `${p.x},${p.y}`).join(" ");
   const last = punkte[punkte.length - 1];
 
+  let zielLinie = "";
+  if (ziel != null) {
+    const zielY = hoehe - pad - ((ziel - effMin) / range) * (hoehe - 2 * pad);
+    zielLinie = `<line x1="${pad}" y1="${zielY}" x2="${breite - pad}" y2="${zielY}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3,3" opacity="0.55"><title>Ziel: ${ziel}${suf}</title></line>`;
+  }
+
   const hoverPunkte = punkte.map(p =>
     `<circle cx="${p.x}" cy="${p.y}" r="6" fill="rgba(255,255,255,0.001)" class="spark-hit">
        <title>${p.periode}: ${p.wert}${suf}</title>
@@ -137,33 +192,39 @@ function sparklineSVG(daten, farbe, breite, hoehe, einheit) {
   ).join("");
 
   return `<svg viewBox="0 0 ${breite} ${hoehe}" preserveAspectRatio="none">
+    ${zielLinie}
     <polyline points="${polyline}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="${last.x}" cy="${last.y}" r="3.5" fill="${strokeColor}"/>
     ${hoverPunkte}
   </svg>`;
 }
 
-// ---- Vormonats-Chips ----
+// ---- Wochen-Chips + Trend-Chip in einer Zeile ----
 function letzteWochenHTML(kpi, trend) {
-  if (!kpi.showLetzteWochen || trend.length < kpi.showLetzteWochen) return "";
+  if (!kpi.showLetzteWochen || trend.length < kpi.showLetzteWochen) {
+    // Auch ohne Wochen-Chips: Trend-Chip zeigen wenn genug Daten
+    const trendOnly = computeTrendChip(kpi, trend || []);
+    return trendOnly ? `<div class="kpi-details letzte-wochen">${trendOnly}</div>` : "";
+  }
   const letzte = trend.slice(-kpi.showLetzteWochen);
   const suf = diffSuffix(kpi.einheit);
-  return `<div class="kpi-details letzte-wochen">` +
-    letzte.map((item, i) => {
-      const wAmpel = getAmpel(item.wert, kpi.schwpiegel, kpi.invertiert);
-      const prev = i > 0 ? letzte[i-1].wert : null;
-      let arrow = "";
-      if (prev !== null) {
-        const diff = item.wert - prev;
-        const isGood = kpi.invertiert ? diff < 0 : diff > 0;
-        const isBad = kpi.invertiert ? diff > 0 : diff < 0;
-        const absDiff = Math.round(Math.abs(diff) * 10) / 10;
-        if (diff > 0) arrow = `<span class="trend-arrow ${isGood ? 'up' : 'down'}">&#9650; +${absDiff}${suf}</span>`;
-        else if (diff < 0) arrow = `<span class="trend-arrow ${isBad ? 'down' : 'up'}">&#9660; ${absDiff}${suf}</span>`;
-        else arrow = `<span class="trend-arrow neutral">&#9654; 0</span>`;
-      }
-      return `<span class="detail-chip woche-chip ${wAmpel}"><strong>${item.wert}</strong> ${item.periode}${arrow}</span>`;
-    }).join("") + `</div>`;
+  const wochenChips = letzte.map((item, i) => {
+    const wAmpel = getAmpel(item.wert, kpi.schwpiegel, kpi.invertiert);
+    const prev = i > 0 ? letzte[i-1].wert : null;
+    let arrow = "";
+    if (prev !== null) {
+      const diff = item.wert - prev;
+      const isGood = kpi.invertiert ? diff < 0 : diff > 0;
+      const isBad = kpi.invertiert ? diff > 0 : diff < 0;
+      const absDiff = Math.round(Math.abs(diff) * 10) / 10;
+      if (diff > 0) arrow = `<span class="trend-arrow ${isGood ? 'up' : 'down'}">&#9650; +${absDiff}${suf}</span>`;
+      else if (diff < 0) arrow = `<span class="trend-arrow ${isBad ? 'down' : 'up'}">&#9660; ${absDiff}${suf}</span>`;
+      else arrow = `<span class="trend-arrow neutral">&#9654; 0</span>`;
+    }
+    return `<span class="detail-chip woche-chip ${wAmpel}"><strong>${item.wert}</strong> ${item.periode}${arrow}</span>`;
+  }).join("");
+  const trendChip = computeTrendChip(kpi, trend);
+  return `<div class="kpi-details letzte-wochen">${wochenChips}${trendChip}</div>`;
 }
 
 // ---- Mitarbeiter-Zeilen ----
@@ -247,16 +308,18 @@ function renderStandardCard(kpi) {
       ${kopfleiste(kpi)}
       <div class="kpi-title">${kpi.label}</div>
       <div class="kpi-value-row">
-        <span class="kpi-value ampel-${ampel}">${formatWert(kpi.aktuell, kpi.einheit)}<span class="kpi-einheit">${einheitSuffix(kpi.einheit)}</span></span>
+        <div class="kpi-value-group">
+          <span class="kpi-value ampel-${ampel}">${formatWert(kpi.aktuell, kpi.einheit)}<span class="kpi-einheit">${einheitSuffix(kpi.einheit)}</span></span>
+          ${zielChipHTML(kpi)}
+        </div>
         <span class="ampel-badge ${ampel}"><span class="ampel-dot"></span>${ampelLabel(ampel)}</span>
       </div>
       ${deltaZeile(trend, kpi)}
       ${progressBar(kpi.aktuell, kpi.ziel, ampel, kpi.invertiert)}
-      <div class="kpi-ziel">Ziel: <strong>${formatWert(kpi.ziel, kpi.einheit)}${einheitSuffix(kpi.einheit)}</strong></div>
       ${detailsHTML}
       ${wochenChips}
       ${trend.length >= 2 ? `
-        <div class="sparkline-container">${sparklineSVG(trend, ampel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit))}</div>
+        <div class="sparkline-container">${sparklineSVG(trend, ampel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit), kpi.ziel)}</div>
         <div class="sparkline-labels">
           <span>${trend[0].periode}</span>
           <span>${trend[trend.length-1].periode}</span>
@@ -283,15 +346,17 @@ function renderMaCard(kpi) {
       ${kopfleiste(kpi)}
       <div class="kpi-title">${kpi.label}</div>
       <div class="kpi-value-row">
-        <span class="kpi-value ampel-${teamAmpel}">${formatWert(kpi.teamAktuell, kpi.einheit)}<span class="kpi-einheit">${einheitSuffix(kpi.einheit)}</span></span>
+        <div class="kpi-value-group">
+          <span class="kpi-value ampel-${teamAmpel}">${formatWert(kpi.teamAktuell, kpi.einheit)}<span class="kpi-einheit">${einheitSuffix(kpi.einheit)}</span></span>
+          ${zielChipHTML(kpi)}
+        </div>
         <span class="ampel-badge ${teamAmpel}"><span class="ampel-dot"></span>${ampelLabel(teamAmpel)}</span>
       </div>
       ${deltaZeile(teamTrend, kpi)}
       ${progressBar(kpi.teamAktuell, kpi.ziel, teamAmpel, kpi.invertiert)}
-      <div class="kpi-ziel">Ziel: <strong>${formatWert(kpi.ziel, kpi.einheit)}${einheitSuffix(kpi.einheit)}</strong> · Team-Schnitt</div>
       ${wochenChips}
       ${teamTrend.length >= 2 ? `
-        <div class="sparkline-container">${sparklineSVG(teamTrend, teamAmpel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit))}</div>
+        <div class="sparkline-container">${sparklineSVG(teamTrend, teamAmpel, sparkBreite, sparkHoehe, einheitSuffix(kpi.einheit), kpi.ziel)}</div>
         <div class="sparkline-labels">
           <span>${teamTrend[0].periode}</span>
           <span>${teamTrend[teamTrend.length-1].periode}</span>
