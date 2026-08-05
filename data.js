@@ -7,7 +7,7 @@
 
 const DASHBOARD_CONFIG = {
   titel: "Partner & Friends – KPI Dashboard",
-  letzteAktualisierung: "04.08.2026",
+  letzteAktualisierung: "05.08.2026",
   aktuelleKW: "KW 32",
   aktuellerMonat: "August 2026",
 };
@@ -141,9 +141,9 @@ const KPI_NPS = {
 // KPI 4: Leads Conversion Rate
 // Intervall: wöchentlich
 // Quelle: 02_Excel_Quelldaten/ConversionRate.xlsx → Sheet Leads Rohdaten
-// Stand 04.08.2026: Reife-Konzept + 5-V-Schwelle deaktiviert
+// Stand 05.08.2026: Reife-Konzept + 5-V-Schwelle deaktiviert
 // Alle 3 Hauptverkäufer mit Total-Werten seit Jan 2026
-// Berechnung teamAktuell: 106 Verträge / 706 Leads = 15.0 %
+// Berechnung teamAktuell: 115 Verträge / 754 Leads = 15.3 %
 // Berechnung teamTrend: nur abgeschlossene Monate (April ausgelassen: nur 2 Leads)
 // Mitarbeiter-Quartale: Q1 (Jan–Mrz), Q2 (Apr–Jun) | Juli läuft noch → Q3 nicht zeigen
 // ============================================================
@@ -157,7 +157,7 @@ const KPI_CONVERSION = {
   verantwortlich: "Vertriebsleitung",
   schwpiegel: { gruen: 20, gelb: 10 },
   ziel: 20,
-  teamAktuell: 15.0,
+  teamAktuell: 15.3,
   showLetzteWochen: 2,
   teamTrend: [
     { periode: "Jan 26", wert: 8.9 },
@@ -236,7 +236,7 @@ const KPI_VERTRAGSEINGAENGE_WOCHE = {
       ],
     },
     david: {
-      aktuell: 35,  // 25 + 10 aus KW 31 (Nachtrag 04.08.)
+      aktuell: 35,
       quartale: [
         { periode: "Apr-Jun", wert: 7 },
       ],
