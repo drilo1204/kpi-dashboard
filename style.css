@@ -26,6 +26,8 @@
   --red-strong: rgba(239, 68, 68, 0.25);
 
   --accent: #6366f1;
+  --accent-bg: rgba(99, 102, 241, 0.14);
+  --accent-strong: rgba(99, 102, 241, 0.38);
   --sparkline: #818cf8;
 }
 
@@ -67,7 +69,8 @@ body {
 .kpi-title { font-size: 0.95rem; color: var(--text-primary); font-weight: 600; line-height: 1.2; margin-top: 0.05rem; }
 .prio .kpi-title, .sek .kpi-title { font-size: 0.95rem; }
 
-.kpi-value-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; margin-top: 0.05rem; }
+.kpi-value-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.55rem; margin-top: 0.05rem; flex-wrap: wrap; }
+.kpi-value-group { display: inline-flex; align-items: baseline; gap: 0.55rem; flex-wrap: wrap; min-width: 0; }
 .kpi-value { font-size: 2.3rem; font-weight: 800; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
 .prio .kpi-value, .sek .kpi-value { font-size: 2.3rem; }
 .kpi-einheit { font-size: 1.05rem; font-weight: 500; color: var(--text-secondary); margin-left: 0.12rem; }
@@ -75,6 +78,31 @@ body {
 .kpi-value.ampel-gruen { color: var(--green); }
 .kpi-value.ampel-gelb  { color: var(--yellow); }
 .kpi-value.ampel-rot   { color: var(--red); }
+
+/* Prominenter Ziel-Chip direkt neben aktuell (nach Stephen Few: Ziel und Ist im gleichen visuellen Kontext) */
+.kpi-ziel-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-strong);
+  padding: 0.28rem 0.6rem;
+  border-radius: 7px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+.kpi-ziel-chip .kpi-ziel-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.kpi-ziel-chip strong { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
 
 .ampel-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 6px; white-space: nowrap; }
 .ampel-badge.gruen { background: var(--green-bg); color: var(--green); }
@@ -102,8 +130,7 @@ body {
 .progress-fill.ampel-rot   { background: var(--red); }
 .progress-label { font-size: 0.58rem; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-.kpi-ziel { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; padding: 0.25rem 0.55rem; background: rgba(255,255,255,0.05); border-radius: 5px; display: inline-block; align-self: flex-start; }
-.kpi-ziel strong { color: var(--text-primary); font-weight: 700; }
+/* alter .kpi-ziel-Block entfaellt bewusst - Ziel steht jetzt oben im .kpi-ziel-chip */
 
 .sparkline-container { width: 100%; height: 22px; margin-top: 0.08rem; }
 .prio .sparkline-container { height: 30px; }
@@ -113,7 +140,7 @@ body {
 
 .sparkline-labels { display: flex; justify-content: space-between; font-size: 0.55rem; color: var(--text-muted); margin-top: 0.05rem; }
 
-.letzte-wochen { gap: 0.3rem; flex-wrap: wrap; }
+.letzte-wochen { gap: 0.3rem; flex-wrap: wrap; align-items: center; }
 .woche-chip { font-size: 0.62rem !important; padding: 0.15rem 0.45rem !important; }
 .woche-chip.gruen { background: var(--green-bg); color: var(--green); }
 .woche-chip.gelb  { background: var(--yellow-bg); color: var(--yellow); }
@@ -123,6 +150,25 @@ body {
 .trend-arrow.up      { color: var(--green); }
 .trend-arrow.down    { color: var(--red); }
 .trend-arrow.neutral { color: var(--text-muted); }
+
+/* Trend-Chip: Vergleich 1. vs 2. Haelfte der letzten N Perioden (Knaflic-Prinzip) */
+.trend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.prio .trend-chip { font-size: 0.72rem; }
+.trend-chip.up      { color: var(--green);  background: var(--green-bg);  border-color: color-mix(in srgb, var(--green) 30%, transparent); }
+.trend-chip.down    { color: var(--red);    background: var(--red-bg);    border-color: color-mix(in srgb, var(--red) 30%, transparent); }
+.trend-chip.neutral { color: var(--text-secondary); background: rgba(255,255,255,0.05); border-color: var(--border-strong); }
 
 .story-text { font-size: 0.68rem; color: var(--text-secondary); font-weight: 500; line-height: 1.3; padding: 0.25rem 0; border-top: 1px solid var(--border-card); margin-top: 0.1rem; }
 .prio .story-text { font-size: 0.75rem; }
